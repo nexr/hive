@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.tez.runtime.library.common.Constants;
 import org.apache.tez.runtime.library.common.sort.impl.TezIndexRecord;
@@ -42,13 +43,22 @@ class IndexCache {
 
   private final LinkedBlockingQueue<String> queue =
       new LinkedBlockingQueue<String>();
+  private FileSystem fs;
 
   public IndexCache(Configuration conf) {
     this.conf = conf;
     totalMemoryAllowed = 10 * 1024 * 1024;
     LOG.info("IndexCache created with max memory = " + totalMemoryAllowed);
+    initLocalFs();
   }
 
+  private void initLocalFs() {
+      try{
+          this.fs = FileSystem.getLocal(conf).getRaw();
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
+  }
   /**
    * This method gets the index information for the given mapId and reduce.
    * It reads the index file into cache if it is not already present.
@@ -118,7 +128,7 @@ class IndexCache {
     LOG.debug("IndexCache MISS: MapId " + mapId + " not found") ;
     TezSpillRecord tmp = null;
     try {
-      tmp = new TezSpillRecord(indexFileName, conf, expectedIndexOwner);
+      tmp = new TezSpillRecord(indexFileName, fs, expectedIndexOwner);
     } catch (Throwable e) {
       tmp = new TezSpillRecord(0);
       cache.remove(mapId);
