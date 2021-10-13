@@ -42,6 +42,9 @@ public class DateColumnStatsDataInspector extends DateColumnStatsData {
       super.setBitVectors(ndvEstimator.serialize());
     }
   }
+  public DateColumnStatsDataInspector(DateColumnStatsData other) {
+    super(other);
+  }
 
   @Override
   public DateColumnStatsDataInspector deepCopy() {
