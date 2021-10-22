@@ -51,6 +51,10 @@ import org.apache.hadoop.hive.ql.lib.NodeProcessorCtx;
 import org.apache.hadoop.hive.ql.lib.Rule;
 import org.apache.hadoop.hive.ql.lib.RuleRegExp;
 import org.apache.hadoop.hive.ql.metadata.Table;
+
+import org.apache.hadoop.hive.ql.parse.ParseContext;
+import org.apache.hadoop.hive.ql.parse.ParseUtils;
+
 import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
 import org.apache.hadoop.hive.ql.parse.ParseContext;
 import org.apache.hadoop.hive.ql.parse.SemanticException;
@@ -206,8 +210,9 @@ public class SortedDynPartitionOptimizer extends Transform {
         if(!VirtualColumn.ROWID.getTypeInfo().equals(ci.getType())) {
           throw new IllegalStateException("expected 1st column to be ROW__ID but got wrong type: " + ci.toString());
         }
-        //HIVE-17328: not sure this is correct... I don't think is gets wrapped in UDFToInteger....
-        bucketColumns.add(new ExprNodeColumnDesc(ci));
+
+        //add a cast(ROW__ID as int) to wrap in UDFToInteger()
+        bucketColumns.add(ParseUtils.createConversionCast(new ExprNodeColumnDesc(ci), TypeInfoFactory.intTypeInfo));
       } else {
         if (!destTable.getSortCols().isEmpty()) {
           // Sort columns specified by table
