@@ -23,7 +23,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
-import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
@@ -1248,27 +1247,14 @@ public final class PrimitiveObjectInspectorUtils {
   }
 
   public static Timestamp getTimestampFromString(String s) {
-    Timestamp result;
     s = s.trim();
     s = trimNanoTimestamp(s);
 
     try {
-      result = Timestamp.valueOf(s);
-    } catch (IllegalArgumentException e) {
-      // Let's try to parse it as timestamp with time zone and transform
-      try {
-        result = Timestamp.valueOf(TimestampTZUtil.parse(s).getZonedDateTime()
-            .toLocalDateTime().toString());
-      } catch (DateTimeException e2) {
-        // Last try: we try to parse it as date and transform
-        try {
-          result = Timestamp.ofEpochMilli(Date.valueOf(s).toEpochMilli());
-        } catch (IllegalArgumentException e3) {
-          result = null;
-        }
-      }
+        return TimestampUtils.stringToTimestamp(s);
+    } catch (IllegalArgumentException e3) {
+        return null;
     }
-    return result;
   }
 
   private static String trimNanoTimestamp(String s) {
@@ -1276,8 +1262,11 @@ public final class PrimitiveObjectInspectorUtils {
     // Throw away extra if more than 9 decimal places
     int periodIdx = s.indexOf(".");
     if (periodIdx != -1) {
-      int secondSpace = firstSpace < 0 ? -1 : s.indexOf(' ', firstSpace + 1);
-      int maxLength = secondSpace == -1 ? s.length() : secondSpace;
+      int secondSpaceOrPlus = firstSpace < 0 ? -1 : s.indexOf(' ', firstSpace + 1);
+      secondSpaceOrPlus = firstSpace < 0 || secondSpaceOrPlus != -1 ?
+          secondSpaceOrPlus : s.indexOf('+', firstSpace + 1);
+      int maxLength = secondSpaceOrPlus == -1 ? s.length() : secondSpaceOrPlus;
+
       if (maxLength - periodIdx > 9) {
         s = s.substring(0, periodIdx + 10).concat(s.substring(maxLength, s.length()));
       }
