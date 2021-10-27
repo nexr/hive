@@ -1919,7 +1919,7 @@ createMaterializedViewStatement
 }
 @after { popMsg(state); }
     : KW_CREATE KW_MATERIALIZED KW_VIEW (ifNotExists)? name=tableName
-        rewriteDisabled? tableComment? tableRowFormat? tableFileFormat? tableLocation?
+        rewriteDisabled? tableComment? viewPartition? tableRowFormat? tableFileFormat? tableLocation?
         tablePropertiesPrefixed? KW_AS selectStatementWithCTE
     -> ^(TOK_CREATE_MATERIALIZED_VIEW $name
          ifNotExists?
