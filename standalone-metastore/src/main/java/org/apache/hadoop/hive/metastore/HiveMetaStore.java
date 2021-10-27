@@ -958,7 +958,8 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       if (counter != null) {
         counter.dec();
       }
-
+      logInfo((getThreadLocalIpAddress() == null ? "" : "source:" + getThreadLocalIpAddress() + " ") +
+              function + " " + context.getInputTableName() + (context.isSuccess() ? "succeed" : "failed"));
       for (MetaStoreEndFunctionListener listener : endFunctionListeners) {
         listener.onEndFunction(function, context);
       }
