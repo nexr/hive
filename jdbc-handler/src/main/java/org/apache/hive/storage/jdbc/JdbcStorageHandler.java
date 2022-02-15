@@ -148,6 +148,14 @@ public class JdbcStorageHandler implements HiveStorageHandler {
     try {
       classesToLoad.add(Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver"));
     } catch (Exception e) {
+    } // Adding sybase jdbc driver if exists
+    try {
+      classesToLoad.add(Class.forName("com.sybase.jdbc4.jdbc.SybDriver"));
+    } catch (Exception e) {
+    } // Adding jTDS jdbc driver if exists
+    try {
+      classesToLoad.add(Class.forName("net.sourceforge.jtds.jdbc.Driver"));
+    } catch (Exception e) {
     }
     try {
       JarUtils.addDependencyJars(conf, classesToLoad);

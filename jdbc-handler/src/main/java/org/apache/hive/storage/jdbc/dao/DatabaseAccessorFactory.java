@@ -51,6 +51,10 @@ public class DatabaseAccessorFactory {
       accessor = new MsSqlDatabaseAccessor();
       break;
 
+    case SYBASE:
+      accessor = new SybaseDatabaseAccessor();
+      break;
+
     default:
       accessor = new GenericJdbcDatabaseAccessor();
       break;
