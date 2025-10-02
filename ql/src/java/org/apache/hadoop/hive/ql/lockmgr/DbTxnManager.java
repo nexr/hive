@@ -637,6 +637,14 @@ public final class DbTxnManager extends HiveTxnManagerImpl {
     }
   }
 
+  private void resetTxnInfo() {
+    txnId = 0;
+    stmtId = -1;
+    numStatements = 0;
+    tableWriteIds.clear();
+    queryId = null;
+  }
+
   @Override
   public void replCommitTxn(String replPolicy, long srcTxnId) throws LockException {
     try {
